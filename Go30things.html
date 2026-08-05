@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>30 Things</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #fbe9d8;
+    --panel: #fef4ea;
+    --panel-2: #fbe4d0;
+    --border: #f0cba7;
+    --chalk: #1c211e;
+    --muted: #7c8880;
+    --weights: #3f7996;
+    --weights-glow: #5b8ba6;
+    --cardio: #2f9c60;
+    --cardio-glow: #3fb673;
+    --gold: #d98e00;
+    --gold-glow: #ffb300;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(255,179,0,0.06), transparent 55%),
+      var(--bg);
+    background-repeat: no-repeat;
+    color: var(--chalk);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height:100vh;
+    padding: 22px 16px 60px;
+  }
+  .wrap{max-width: 520px; margin: 0 auto;}
+
+  /* ---- Settings button ---- */
+  .settings-btn{
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 17px;
+    cursor:pointer;
+    z-index: 30;
+    box-shadow: 0 6px 16px -8px rgba(0,0,0,0.35);
+  }
+  .settings-btn:active{ transform: scale(0.92); }
+
+  /* ---- Header ---- */
+  .brand{
+    text-align:center;
+    margin-bottom: 22px;
+  }
+  .brand .eyebrow{
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .brand h1{
+    font-family:'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 34px;
+    letter-spacing: 3px;
+    margin: 0;
+    background: linear-gradient(180deg, #1c211e, #3a423d 55%, #5c6560);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+  }
+  .brand h1 span{ color: var(--gold); -webkit-text-fill-color: var(--gold); text-shadow: 0 0 18px rgba(255,179,0,0.55);}
+
+  /* ---- Scoreboard panel ---- */
+  .scoreboard{
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 18px 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 40px -20px rgba(0,0,0,0.6);
+    margin-bottom: 18px;
+  }
+  .score-row{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 14px;
+  }
+  .score-label{
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .score-digits{
+    font-family:'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 0 6px var(--gold-glow), 0 0 26px rgba(255,179,0,0.45);
+  }
+  .score-digits.small{ font-size: 26px; color: var(--chalk); text-shadow: 0 0 14px rgba(236,232,221,0.25);}
+  .score-target{ text-align:right; }
+
+  /* 30-bulb strip */
+  .bulbs{
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin: 10px 0 4px;
+  }
+  .bulb{
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: #f5d9bd;
+    border: 1px solid var(--border);
+    transition: all .25s ease;
+  }
+  .bulb.on-weights{
+    background: var(--weights);
+    box-shadow: 0 0 8px var(--weights-glow), inset 0 0 4px rgba(255,255,255,0.4);
+    border-color: transparent;
+  }
+  .bulb.on-cardio{
+    background: var(--cardio);
+    box-shadow: 0 0 8px var(--cardio-glow), inset 0 0 4px rgba(255,255,255,0.4);
+    border-color: transparent;
+  }
+  .overflow-badge{
+    text-align:center;
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  /* ---- Tap buttons ---- */
+  .buttons{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .tapbtn{
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 10px;
+    min-height: 118px;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    cursor:pointer;
+    user-select:none;
+    background: var(--panel);
+    transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    -webkit-user-select:none;
+  }
+  .tapbtn:active{ transform: scale(0.96); }
+  .tapbtn .icon{ font-size: 30px; line-height:1; }
+  .tapbtn .label{
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+  }
+  .tapbtn .sub{ font-size: 11px; color: var(--muted); letter-spacing: 1px;}
+  .tapbtn.weights{ box-shadow: inset 0 0 0 1px rgba(91,139,166,0.25);}
+  .tapbtn.weights .icon, .tapbtn.weights .label{ color: var(--weights-glow); }
+  .tapbtn.weights:active{ background: rgba(91,139,166,0.14); box-shadow: 0 0 24px rgba(91,139,166,0.35); }
+  .tapbtn.cardio{ box-shadow: inset 0 0 0 1px rgba(63,182,115,0.25);}
+  .tapbtn.cardio .icon, .tapbtn.cardio .label{ color: var(--cardio-glow); }
+  .tapbtn.cardio:active{ background: rgba(63,182,115,0.14); box-shadow: 0 0 24px rgba(63,182,115,0.35); }
+
+  .undo{
+    text-align:center;
+    font-size: 12px;
+    color: var(--muted);
+    margin: -8px 0 18px;
+    cursor:pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .undo:hover{ color: var(--chalk); }
+
+  /* ---- Section cards ---- */
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 16px 12px;
+    margin-bottom: 14px;
+  }
+  .card h2{
+    font-family:'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+
+  .chart{
+    display:flex;
+    align-items:flex-end;
+    gap: 8px;
+    height: 120px;
+    position: relative;
+  }
+  .chart.weekly{ gap: 10px; }
+  .target-line{
+    position:absolute;
+    left:0; right:0;
+    border-top: 1px dashed rgba(255,179,0,0.5);
+  }
+  .target-line span{
+    position:absolute;
+    right:0; top:-16px;
+    font-size:10px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .bar-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    gap:6px;
+  }
+  .bar-stack{
+    width: 100%;
+    max-width: 34px;
+    display:flex;
+    flex-direction:column-reverse;
+    justify-content:flex-start;
+    border-radius: 5px 5px 3px 3px;
+    overflow:hidden;
+    background: #f5d9bd;
+    min-height: 3px;
+  }
+  .bar-seg{ width:100%; }
+  .bar-seg.weights{ background: linear-gradient(180deg, var(--weights-glow), var(--weights)); }
+  .bar-seg.cardio{ background: linear-gradient(180deg, var(--cardio-glow), var(--cardio)); }
+  .bar-col .bar-value{ font-size: 10px; color: var(--muted); }
+  .bar-col.hit .bar-value{ color: var(--gold); font-weight:600; }
+  .bar-col .bar-day{ font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+
+  .prop-bar{
+    display:flex;
+    height: 14px;
+    border-radius: 8px;
+    overflow:hidden;
+    background:#f5d9bd;
+    margin-bottom: 8px;
+  }
+  .prop-bar .seg.weights{ background: var(--weights); }
+  .prop-bar .seg.cardio{ background: var(--cardio); }
+  .prop-legend{
+    display:flex;
+    justify-content:space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .prop-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+  .dot.weights{ background: var(--weights); }
+  .dot.cardio{ background: var(--cardio); }
+
+  .streak-strip{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .streak-strip .flames{ font-size: 15px; letter-spacing: 2px; }
+
+  /* ---- Overlay (shared by reward / motivation / settings) ---- */
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(251,233,216,0.92);
+    display:flex; align-items:center; justify-content:center;
+    z-index: 50;
+    opacity:0; pointer-events:none;
+    transition: opacity .3s ease;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .reward-card{
+    text-align:center;
+    max-width: 360px;
+    transform: scale(0.9);
+    transition: transform .3s ease;
+    margin: auto;
+  }
+  .overlay.show .reward-card{ transform: scale(1); }
+  .reward-card .big-emoji{ font-size: 60px; margin-bottom: 6px; filter: drop-shadow(0 0 20px rgba(255,179,0,0.6)); }
+  .reward-card h3{
+    font-family:'Orbitron', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,179,0,0.6);
+    margin: 4px 0 8px;
+  }
+  .reward-card p{ color: var(--chalk); font-size: 14px; opacity:0.85; margin: 0 0 20px; }
+  .reward-card button{
+    background: var(--gold);
+    color: #1a1200;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    padding: 12px 26px;
+    border-radius: 30px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor:pointer;
+  }
+
+  /* ---- Settings panel ---- */
+  .settings-card{ max-width: 380px; text-align:center; background: var(--panel); border:1px solid var(--border); border-radius:18px; padding: 22px 20px; }
+  .settings-card h3{
+    font-family:'Orbitron', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--chalk);
+    margin: 0 0 16px;
+  }
+  .settings-section{ margin-bottom: 16px; text-align:left; }
+  .settings-label{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;}
+  .bg-toggle{ display:flex; gap:8px; }
+  .bg-toggle-btn{
+    flex:1;
+    padding: 9px;
+    border-radius: 10px;
+    border:1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--chalk);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size: 13px;
+    cursor:pointer;
+  }
+  .bg-toggle-btn.active{
+    background: var(--gold);
+    color:#1a1200;
+    border-color: transparent;
+  }
+  #bgColorInput{ width:100%; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--panel); cursor:pointer; padding: 2px; }
+  #bgImageInput{ width:100%; font-size: 13px; }
+  #bgDimInput{ width:100%; }
+  .img-preview{
+    width:100%; height: 80px; border-radius: 10px; margin-top:10px;
+    background-size: cover; background-position:center;
+    border:1px solid var(--border); display:none;
+  }
+  .btn-secondary{
+    background: var(--panel-2);
+    color: var(--chalk);
+    border:1px solid var(--border);
+    padding: 9px 14px;
+    border-radius: 20px;
+    font-size:13px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .settings-footer-note{ font-size:11px; color:var(--muted); margin-top:4px; }
+
+  .toast{
+    position:fixed;
+    bottom: 24px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--chalk);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    opacity:0;
+    transition: all .3s ease;
+    z-index: 40;
+    white-space: nowrap;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  #fireworksCanvas{
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    display: none;
+  }
+
+  .footer-note{ text-align:center; font-size:11px; color:#4a544e; margin-top: 18px; letter-spacing: 0.5px;}
+</style>
+</head>
+<body>
+
+<button class="settings-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
+
+<div class="wrap">
+
+  <div class="brand">
+    <div class="eyebrow">Daily Training Log</div>
+    <h1>30 <span>THINGS</span></h1>
+  </div>
+
+  <div class="scoreboard">
+    <div class="score-row">
+      <div>
+        <div class="score-label">This Week</div>
+        <div class="score-digits" id="weekTotal">0</div>
+      </div>
+      <div class="score-target">
+        <div class="score-label">Target</div>
+        <div class="score-digits small">/ 30</div>
+      </div>
+    </div>
+    <div class="bulbs" id="bulbs"></div>
+    <div class="overflow-badge" id="overflowBadge" style="display:none;"></div>
+  </div>
+
+  <div class="buttons">
+    <div class="tapbtn weights" id="btnWeights">
+      <div class="icon">🏋️</div>
+      <div class="label">WEIGHTS</div>
+      <div class="sub">tap to log</div>
+    </div>
+    <div class="tapbtn cardio" id="btnCardio">
+      <div class="icon">🏃</div>
+      <div class="label">CARDIO</div>
+      <div class="sub">5 min block</div>
+    </div>
+  </div>
+
+  <div class="undo" id="undoBtn">undo last entry</div>
+
+  <div class="card">
+    <h2>This Week — Daily</h2>
+    <div class="chart" id="dailyChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>Weekly History</h2>
+    <div class="chart weekly" id="weeklyChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>Weights vs Cardio</h2>
+    <div class="prop-bar" id="propBar"></div>
+    <div class="prop-legend">
+      <span><span class="dot weights"></span><span id="propWeightsLabel">Weights 0%</span></span>
+      <span><span id="propCardioLabel">Cardio 0%</span><span class="dot cardio" style="margin-left:6px;"></span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="streak-strip">
+      <span id="streakText">No streak yet — hit 30 two weeks running to unlock one 🔥</span>
+    </div>
+  </div>
+
+  <div class="footer-note">Data is saved on this device automatically</div>
+</div>
+
+<!-- Streak reward -->
+<div class="overlay" id="rewardOverlay">
+  <div class="reward-card">
+    <div class="big-emoji">🏆</div>
+    <h3 id="rewardTitle">2-WEEK STREAK!</h3>
+    <p id="rewardBody">You hit 30+ things two weeks in a row. That's real consistency.</p>
+    <button id="rewardClose">LET'S GO</button>
+  </div>
+</div>
+
+<!-- Motivational popup, every 5 logged -->
+<div class="overlay" id="motivationOverlay">
+  <div class="reward-card">
+    <div class="big-emoji">💪</div>
+    <p id="motivationBody" style="font-size:16px; font-weight:600; opacity:1; margin-bottom:22px;"></p>
+    <button id="motivationClose">BACK TO IT</button>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="settingsOverlay">
+  <div class="settings-card">
+    <h3>SETTINGS</h3>
+
+    <div class="settings-section">
+      <div class="settings-label">Background</div>
+      <div class="bg-toggle">
+        <button type="button" class="bg-toggle-btn" id="bgTypeColorBtn">Color</button>
+        <button type="button" class="bg-toggle-btn" id="bgTypeImageBtn">Image</button>
+      </div>
+    </div>
+
+    <div class="settings-section" id="colorSection">
+      <input type="color" id="bgColorInput" value="#fbe9d8">
+    </div>
+
+    <div class="settings-section" id="imageSection" style="display:none;">
+      <input type="file" id="bgImageInput" accept="image/*">
+      <div class="img-preview" id="imgPreview"></div>
+      <div class="settings-label" style="margin-top:12px;">Image darkness (for readability)</div>
+      <input type="range" id="bgDimInput" min="0" max="0.85" step="0.05" value="0.55">
+      <button type="button" id="bgImageRemove" class="btn-secondary" style="margin-top:10px;">Remove image</button>
+    </div>
+
+    <div class="settings-section" style="border-top:1px solid var(--border); padding-top:14px;">
+      <div class="settings-label">Backup</div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" id="exportBtn" class="btn-secondary">Export data</button>
+        <button type="button" id="importBtn" class="btn-secondary">Import data</button>
+        <input type="file" id="importFileInput" accept="application/json" style="display:none;">
+      </div>
+      <div class="settings-footer-note">Your log already survives app updates automatically. Export gives you a backup file just in case.</div>
+    </div>
+
+    <button id="settingsClose" style="margin-top:6px;">DONE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas id="fireworksCanvas"></canvas>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'things30_entries';
+  const SETTINGS_KEY = 'things30_settings';
+  const MOTIVATION_KEY = 'things30_motivation_state';
+  let entries = [];
+  let bgSettings = { type: 'color', color: '#fbe9d8', image: null, dim: 0.55 };
+  let motivationState = { queue: [], lastShown: null };
+
+  const bulbsEl = document.getElementById('bulbs');
+  const weekTotalEl = document.getElementById('weekTotal');
+  const overflowBadge = document.getElementById('overflowBadge');
+  const dailyChart = document.getElementById('dailyChart');
+  const weeklyChart = document.getElementById('weeklyChart');
+  const propBar = document.getElementById('propBar');
+  const propWeightsLabel = document.getElementById('propWeightsLabel');
+  const propCardioLabel = document.getElementById('propCardioLabel');
+  const streakText = document.getElementById('streakText');
+  const toastEl = document.getElementById('toast');
+  const overlay = document.getElementById('rewardOverlay');
+  const rewardTitle = document.getElementById('rewardTitle');
+  const rewardBody = document.getElementById('rewardBody');
+  const motivationOverlay = document.getElementById('motivationOverlay');
+  const motivationBody = document.getElementById('motivationBody');
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const fireworksCanvas = document.getElementById('fireworksCanvas');
+
+  // ---------- storage ----------
+  // Uses localStorage so data persists in Safari on iPhone, and survives
+  // redeploying/replacing this HTML file (as long as it stays at the same
+  // URL/path). window.storage only exists inside Claude's own artifact
+  // preview, not in a saved/standalone file, so it isn't used here.
+  async function loadEntries(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        entries = JSON.parse(raw);
+      }
+    }catch(e){
+      entries = [];
+    }
+  }
+  async function saveEntries(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }catch(e){
+      console.error('Storage error', e);
+      showToast('⚠️ Could not save — storage may be full or blocked');
+    }
+  }
+
+  function loadSettings(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if(raw){
+        bgSettings = Object.assign({}, bgSettings, JSON.parse(raw));
+      }
+    }catch(e){}
+  }
+  function saveSettings(){
+    try{
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(bgSettings));
+    }catch(e){
+      console.error('Settings storage error', e);
+      showToast('⚠️ Could not save background — image may be too large');
+    }
+  }
+
+  function loadMotivationState(){
+    try{
+      const raw = localStorage.getItem(MOTIVATION_KEY);
+      if(raw) motivationState = JSON.parse(raw);
+    }catch(e){}
+  }
+  function saveMotivationState(){
+    try{ localStorage.setItem(MOTIVATION_KEY, JSON.stringify(motivationState)); }catch(e){}
+  }
+
+  // ---------- date helpers ----------
+  function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function mondayOf(d){
+    const x = startOfDay(d);
+    const day = x.getDay(); // 0 Sun .. 6 Sat
+    const diff = (day === 0 ? -6 : 1 - day);
+    x.setDate(x.getDate() + diff);
+    return x;
+  }
+  function weekKey(d){ return mondayOf(d).toISOString().slice(0,10); }
+  function dayKey(d){ return startOfDay(d).toISOString().slice(0,10); }
+  function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+
+  // ---------- core add/undo ----------
+  async function addEntry(type){
+    const now = new Date();
+    const prevWeekTotal = weekTotalFor(weekKey(now));
+    entries.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), type, ts: now.toISOString() });
+    await saveEntries();
+    const newWeekTotal = weekTotalFor(weekKey(now));
+    render();
+    const rewardShown = checkRewards(prevWeekTotal, newWeekTotal, now);
+    if(!rewardShown && entries.length > 0 && entries.length % 5 === 0){
+      showMotivation();
+    }
+  }
+
+  async function undoLast(){
+    if(entries.length === 0) return;
+    entries.pop();
+    await saveEntries();
+    render();
+    showToast('Last entry removed');
+  }
+
+  function weekTotalFor(wk){
+    return entries.filter(e => weekKey(new Date(e.ts)) === wk).length;
+  }
+
+  // ---------- rewards ----------
+  function checkRewards(prevTotal, newTotal, now){
+    if(prevTotal < 30 && newTotal >= 30){
+      const prevWeekDate = addDays(mondayOf(now), -7);
+      const prevWeekK = weekKey(prevWeekDate);
+      const prevWeekCount = weekTotalFor(prevWeekK);
+      if(prevWeekCount >= 30){
+        showReward('2-WEEK STREAK!', "You hit 30+ things two weeks running. That's real consistency. 🔥");
+        return true;
+      } else {
+        showToast('🎯 Weekly target hit — 30 things!');
+        return false;
+      }
+    }
+    return false;
+  }
+
+  function showReward(title, body){
+    rewardTitle.textContent = title;
+    rewardBody.textContent = body;
+    overlay.classList.add('show');
+    launchFireworks();
+  }
+  document.getElementById('rewardClose').addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
+
+  // ---------- motivational popups ----------
+  const MOTIVATIONS = [
+    "🔥 Five more in the bank. Your future self just texted to say thanks.",
+    "💪 That's five. Somewhere, a couch cushion is quietly grieving.",
+    "⚡ Five logged. You're basically a superhero now, minus the cape, plus sore quads.",
+    "🚀 Five things down. NASA called — they want your propulsion system.",
+    "🏆 Five reps into greatness. Keep going, legend.",
+    "🎯 Five hits. Precision like that deserves a trophy, or at least a protein shake.",
+    "🐇 You started slow, now look at you. Five and counting.",
+    "🧠 Fun fact: discipline tastes like sweat and smells like victory. Five down.",
+    "🦾 Five logged. Robots wish they had your consistency.",
+    "🍕 You've earned the right to think about pizza. Five things, no judgment.",
+    "🐉 You just slayed five dragons. Or did push-ups. Basically the same thing.",
+    "🌟 Five and still standing. Gravity is taking this personally.",
+    "🏋️ Five things checked off. Your muscles are filing a formal complaint — a happy one.",
+    "🎉 Five! That's not luck, that's a pattern. Keep the pattern going.",
+    "🔋 Five logged, battery at 100%. Or at least it feels that way.",
+    "🐎 Galloping through goals. Five down, no signs of slowing.",
+    "🥇 If consistency were an Olympic sport, you'd be on the podium. Five things.",
+    "🌪️ You're a certified whirlwind of effort. Five and going strong.",
+    "🧗 Five things climbed. Everest's got nothing on your to-do list.",
+    "☕ Take a breath, you earned it. Five logged like a champion.",
+    "🚂 The little engine that absolutely could. Five and chugging along.",
+    "🎸 Five things logged. That's basically a rockstar encore.",
+    "🍀 Some call it luck. We call it five solid reps of showing up.",
+    "🛠️ You're building a better you, one log at a time. Five so far.",
+    "🐊 Snapping at goals like a crocodile at snack time. Five down.",
+    "🌊 Riding the wave of consistency. Five logged, zero wipeouts.",
+    "🕶️ Too cool for excuses. Five things, zero regrets.",
+    "🍫 You deserve a little treat. Five things in the books.",
+    "🧨 Boom. Five things detonated off your list.",
+    "🐺 The pack respects the grind. Five logged, alpha status confirmed.",
+    "🏗️ Building momentum brick by brick. That's five bricks now.",
+    "🎢 Ups, downs, but you kept moving. Five things logged.",
+    "🥋 Discipline level: black belt. Five things down.",
+    "🛰️ You're in orbit now. Five logged, gravity can't stop you.",
+    "🐝 Busy as a bee, buff as... well, getting there. Five down.",
+    "🎬 And... cut! That's a wrap on five solid reps of effort.",
+    "🧊 Cool, calm, and crushing it. Five things logged.",
+    "🐘 Never forget how good this feels. Five things, memory made.",
+    "🥊 Five rounds in, still standing. The bell hasn't rung yet.",
+    "🌈 Somewhere, a gym bro is proud of you. Five logged.",
+    "🚦 Green light on greatness. Five things, keep driving.",
+    "🎮 Achievement unlocked: Five Things. Rare drop, well earned.",
+    "🍩 You've officially out-worked the donut. Five logged.",
+    "🐆 Fast, sleek, unstoppable. Five things down.",
+    "🧵 Stitching together a habit, one log at a time. Five so far.",
+    "🛶 Paddling steady toward your goals. Five things logged.",
+    "🎯 Bullseye energy. Five hits, keep aiming high.",
+    "🐴 Strong like a horse, stubborn like one too. Five things logged.",
+    "🌤️ Cloudy with a chance of gains. Five things done.",
+    "🍿 Grab a snack, you've earned the intermission. Five logged.",
+    "🐬 Smooth, sleek, and cutting through the workday. Five things.",
+    "🎇 Five things sparked. The good kind of fireworks are coming.",
+    "🐢 Slow and steady wins, but you're basically sprinting now. Five logged.",
+    "🍋 When life gives you lemons, you log five things anyway.",
+    "🛡️ Five logged, defenses up against future-you's excuses.",
+    "🎪 Step right up, folks, witness the human who actually shows up. Five down.",
+    "🐧 Waddling toward greatness, one log at a time. Five so far.",
+    "🚴 Pedaling past your own expectations. Five things logged.",
+    "🧯 You're on fire and, unusually, that's a great thing. Five logged.",
+    "🗿 Built like a monument to consistency. Five things down.",
+    "🛎️ Ding ding, five things served fresh. Table for one champion.",
+  ];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  function nextMotivation(){
+    if(!motivationState.queue || motivationState.queue.length === 0){
+      let fresh = shuffle(MOTIVATIONS.map((_, i) => i));
+      if(motivationState.lastShown !== null && fresh[0] === motivationState.lastShown && fresh.length > 1){
+        const tmp = fresh[0]; fresh[0] = fresh[1]; fresh[1] = tmp;
+      }
+      motivationState.queue = fresh;
+    }
+    const idx = motivationState.queue.shift();
+    motivationState.lastShown = idx;
+    saveMotivationState();
+    return MOTIVATIONS[idx];
+  }
+  function showMotivation(){
+    motivationBody.textContent = nextMotivation();
+    motivationOverlay.classList.add('show');
+  }
+  document.getElementById('motivationClose').addEventListener('click', () => {
+    motivationOverlay.classList.remove('show');
+  });
+
+  let toastTimer = null;
+  function showToast(msg){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+
+  // ---------- fireworks ----------
+  function launchFireworks(durationMs = 3200){
+    const canvas = fireworksCanvas;
+    const ctx = canvas.getContext('2d');
+    canvas.style.display = 'block';
+    function resize(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+
+    let particles = [];
+    const colors = ['#ffb300','#ff5252','#5b8ba6','#3fb673','#ffd54f','#ff8a65','#ba68c8','#4fc3f7'];
+
+    function spawnBurst(x, y){
+      const count = 45 + Math.floor(Math.random()*25);
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      for(let i=0;i<count;i++){
+        const angle = (Math.PI*2*i)/count + Math.random()*0.25;
+        const speed = 2 + Math.random()*4.5;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle)*speed,
+          vy: Math.sin(angle)*speed,
+          life: 1,
+          decay: 0.008 + Math.random()*0.014,
+          color,
+          size: 2 + Math.random()*2.2
+        });
+      }
+    }
+
+    let running = true;
+    let lastBurst = -1000;
+    const start = performance.now();
+
+    function frame(t){
+      if(!running) return;
+      const elapsed = t - start;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if(elapsed - lastBurst > 420 && elapsed < durationMs - 500){
+        lastBurst = elapsed;
+        spawnBurst(canvas.width*(0.18+Math.random()*0.64), canvas.height*(0.18+Math.random()*0.34));
+      }
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.045;
+        p.life -= p.decay;
+        ctx.globalAlpha = Math.max(p.life, 0);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        ctx.fill();
+      });
+      particles = particles.filter(p => p.life > 0);
+      ctx.globalAlpha = 1;
+
+      if(elapsed < durationMs || particles.length){
+        requestAnimationFrame(frame);
+      } else {
+        running = false;
+        canvas.style.display = 'none';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- background settings ----------
+  function applyBackground(){
+    const layers = ['radial-gradient(ellipse at 50% -10%, rgba(255,179,0,0.06), transparent 55%)'];
+    if(bgSettings.type === 'image' && bgSettings.image){
+      const dim = bgSettings.dim ?? 0.55;
+      layers.push(`linear-gradient(rgba(255,255,255,${dim}), rgba(255,255,255,${dim}))`);
+      layers.push(`url("${bgSettings.image}")`);
+      document.body.style.backgroundSize = 'auto, cover, cover';
+      document.body.style.backgroundPosition = 'center, center, center';
+      document.body.style.backgroundAttachment = 'scroll, fixed, fixed';
+    } else {
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+    }
+    document.body.style.backgroundImage = layers.join(', ');
+    document.body.style.backgroundColor = bgSettings.color || '#fbe9d8';
+  }
+
+  function resizeImageFile(file, maxDim){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('decode failed'));
+        img.onload = () => {
+          let { width, height } = img;
+          if(width > maxDim || height > maxDim){
+            const scale = maxDim / Math.max(width, height);
+            width = Math.round(width*scale);
+            height = Math.round(height*scale);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function refreshSettingsUI(){
+    const colorBtn = document.getElementById('bgTypeColorBtn');
+    const imageBtn = document.getElementById('bgTypeImageBtn');
+    const colorSection = document.getElementById('colorSection');
+    const imageSection = document.getElementById('imageSection');
+    const colorInput = document.getElementById('bgColorInput');
+    const dimInput = document.getElementById('bgDimInput');
+    const preview = document.getElementById('imgPreview');
+
+    colorBtn.classList.toggle('active', bgSettings.type === 'color');
+    imageBtn.classList.toggle('active', bgSettings.type === 'image');
+    colorSection.style.display = bgSettings.type === 'color' ? 'block' : 'none';
+    imageSection.style.display = bgSettings.type === 'image' ? 'block' : 'none';
+    colorInput.value = bgSettings.color || '#fbe9d8';
+    dimInput.value = bgSettings.dim ?? 0.55;
+    if(bgSettings.image){
+      preview.style.backgroundImage = `url("${bgSettings.image}")`;
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    refreshSettingsUI();
+    settingsOverlay.classList.add('show');
+  });
+  document.getElementById('settingsClose').addEventListener('click', () => {
+    settingsOverlay.classList.remove('show');
+  });
+  document.getElementById('bgTypeColorBtn').addEventListener('click', () => {
+    bgSettings.type = 'color';
+    saveSettings(); applyBackground(); refreshSettingsUI();
+  });
+  document.getElementById('bgTypeImageBtn').addEventListener('click', () => {
+    bgSettings.type = 'image';
+    saveSettings(); applyBackground(); refreshSettingsUI();
+  });
+  document.getElementById('bgColorInput').addEventListener('input', (e) => {
+    bgSettings.color = e.target.value;
+    saveSettings(); applyBackground();
+  });
+  document.getElementById('bgDimInput').addEventListener('input', (e) => {
+    bgSettings.dim = parseFloat(e.target.value);
+    saveSettings(); applyBackground();
+  });
+  document.getElementById('bgImageRemove').addEventListener('click', () => {
+    bgSettings.image = null;
+    bgSettings.type = 'color';
+    saveSettings(); applyBackground(); refreshSettingsUI();
+  });
+  document.getElementById('bgImageInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    try{
+      const dataUrl = await resizeImageFile(file, 1600);
+      bgSettings.image = dataUrl;
+      bgSettings.type = 'image';
+      saveSettings();
+      applyBackground();
+      refreshSettingsUI();
+      showToast('Background image set');
+    }catch(err){
+      showToast('⚠️ Could not use that image');
+    }
+  });
+
+  // ---------- backup / export / import ----------
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      entries,
+      settings: bgSettings
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '30things-backup-' + dayKey(new Date()) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Backup downloaded');
+  });
+  document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('importFileInput').click();
+  });
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(Array.isArray(data.entries)){
+        entries = data.entries;
+        await saveEntries();
+      }
+      if(data.settings){
+        bgSettings = Object.assign({}, bgSettings, data.settings);
+        saveSettings();
+        applyBackground();
+        refreshSettingsUI();
+      }
+      render();
+      showToast('Backup restored');
+    }catch(err){
+      showToast('⚠️ Could not read that backup file');
+    }
+    e.target.value = '';
+  });
+
+  // ---------- render ----------
+  function render(){
+    const now = new Date();
+    const thisWeekKey = weekKey(now);
+    const weekEntries = entries.filter(e => weekKey(new Date(e.ts)) === thisWeekKey);
+    const total = weekEntries.length;
+
+    weekTotalEl.textContent = total;
+
+    // bulbs
+    bulbsEl.innerHTML = '';
+    const shown = weekEntries.slice(0, 30);
+    for(let i=0; i<30; i++){
+      const b = document.createElement('div');
+      b.className = 'bulb';
+      if(shown[i]){
+        b.classList.add(shown[i].type === 'weights' ? 'on-weights' : 'on-cardio');
+      }
+      bulbsEl.appendChild(b);
+    }
+    if(total > 30){
+      overflowBadge.style.display = 'block';
+      overflowBadge.textContent = '+' + (total - 30) + ' beyond target 🎉';
+    } else {
+      overflowBadge.style.display = 'none';
+    }
+
+    renderDaily(now, thisWeekKey);
+    renderWeekly(now);
+    renderProportion();
+    renderStreak(now);
+  }
+
+  function renderDaily(now, thisWeekKey){
+    dailyChart.innerHTML = '';
+    const monday = mondayOf(now);
+    const days = [];
+    let maxVal = 1;
+    for(let i=0;i<7;i++){
+      const d = addDays(monday, i);
+      const dk = dayKey(d);
+      const dayEntries = entries.filter(e => dayKey(new Date(e.ts)) === dk);
+      const w = dayEntries.filter(e=>e.type==='weights').length;
+      const c = dayEntries.filter(e=>e.type==='cardio').length;
+      days.push({ d, w, c, total: w+c });
+      maxVal = Math.max(maxVal, w+c);
+    }
+    const labels = ['M','T','W','T','F','S','S'];
+    days.forEach((day, i) => {
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      const stack = document.createElement('div');
+      stack.className = 'bar-stack';
+      const heightPx = 84;
+      const wH = maxVal ? (day.w / maxVal) * heightPx : 0;
+      const cH = maxVal ? (day.c / maxVal) * heightPx : 0;
+      stack.style.height = Math.max(wH + cH, day.total>0?4:0) + 'px';
+      if(day.w > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg weights';
+        seg.style.height = wH + 'px';
+        stack.appendChild(seg);
+      }
+      if(day.c > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg cardio';
+        seg.style.height = cH + 'px';
+        stack.appendChild(seg);
+      }
+      col.appendChild(stack);
+      const val = document.createElement('div');
+      val.className = 'bar-value';
+      val.textContent = day.total;
+      col.appendChild(val);
+      const lab = document.createElement('div');
+      lab.className = 'bar-day';
+      lab.textContent = labels[i];
+      col.appendChild(lab);
+      dailyChart.appendChild(col);
+    });
+  }
+
+  function renderWeekly(now){
+    weeklyChart.innerHTML = '';
+    const currentMonday = mondayOf(now);
+    const weeks = [];
+    for(let i=7;i>=0;i--){
+      const wStart = addDays(currentMonday, -7*i);
+      const wk = weekKey(wStart);
+      const wEntries = entries.filter(e => weekKey(new Date(e.ts)) === wk);
+      const w = wEntries.filter(e=>e.type==='weights').length;
+      const c = wEntries.filter(e=>e.type==='cardio').length;
+      weeks.push({ wk, w, c, total: w+c, start: wStart });
+    }
+    const maxVal = Math.max(30, ...weeks.map(x=>x.total));
+    const heightPx = 90;
+
+    const targetLine = document.createElement('div');
+    targetLine.className = 'target-line';
+    targetLine.style.bottom = (30/maxVal*heightPx) + 'px';
+    const tSpan = document.createElement('span');
+    tSpan.textContent = '30';
+    targetLine.appendChild(tSpan);
+    weeklyChart.appendChild(targetLine);
+
+    weeks.forEach((wk, i) => {
+      const col = document.createElement('div');
+      col.className = 'bar-col' + (wk.total >= 30 ? ' hit' : '');
+      const stack = document.createElement('div');
+      stack.className = 'bar-stack';
+      const wH = (wk.w / maxVal) * heightPx;
+      const cH = (wk.c / maxVal) * heightPx;
+      stack.style.height = Math.max(wH + cH, wk.total>0?4:0) + 'px';
+      if(wk.w > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg weights';
+        seg.style.height = wH + 'px';
+        stack.appendChild(seg);
+      }
+      if(wk.c > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg cardio';
+        seg.style.height = cH + 'px';
+        stack.appendChild(seg);
+      }
+      col.appendChild(stack);
+      const val = document.createElement('div');
+      val.className = 'bar-value';
+      val.textContent = wk.total;
+      col.appendChild(val);
+      const lab = document.createElement('div');
+      lab.className = 'bar-day';
+      const isCurrent = i === weeks.length-1;
+      lab.textContent = isCurrent ? 'Now' : (wk.start.getMonth()+1) + '/' + wk.start.getDate();
+      col.appendChild(lab);
+      weeklyChart.appendChild(col);
+    });
+  }
+
+  function renderProportion(){
+    const w = entries.filter(e=>e.type==='weights').length;
+    const c = entries.filter(e=>e.type==='cardio').length;
+    const t = w + c;
+    propBar.innerHTML = '';
+    if(t === 0){
+      propBar.innerHTML = '<div class="seg weights" style="width:50%"></div><div class="seg cardio" style="width:50%"></div>';
+      propWeightsLabel.textContent = 'Weights —';
+      propCardioLabel.textContent = 'Cardio —';
+      return;
+    }
+    const wPct = Math.round((w/t)*100);
+    const cPct = 100 - wPct;
+    const segW = document.createElement('div');
+    segW.className = 'seg weights';
+    segW.style.width = wPct + '%';
+    const segC = document.createElement('div');
+    segC.className = 'seg cardio';
+    segC.style.width = cPct + '%';
+    propBar.appendChild(segW);
+    propBar.appendChild(segC);
+    propWeightsLabel.textContent = 'Weights ' + wPct + '%';
+    propCardioLabel.textContent = 'Cardio ' + cPct + '%';
+  }
+
+  function renderStreak(now){
+    const currentMonday = mondayOf(now);
+    // find earliest week with data
+    if(entries.length === 0){
+      streakText.textContent = 'No streak yet — hit 30 two weeks running to unlock one 🔥';
+      return;
+    }
+    const earliest = entries.reduce((min, e) => new Date(e.ts) < min ? new Date(e.ts) : min, new Date(entries[0].ts));
+    let cursor = mondayOf(earliest);
+    const weekTotals = [];
+    while(cursor <= currentMonday){
+      const wk = weekKey(cursor);
+      weekTotals.push(weekTotalFor(wk));
+      cursor = addDays(cursor, 7);
+    }
+    let streak = 0;
+    for(let i = weekTotals.length - 1; i >= 0; i--){
+      if(weekTotals[i] >= 30) streak++;
+      else break;
+    }
+    if(streak >= 2){
+      streakText.textContent = '🔥 '.repeat(Math.min(streak,5)).trim() + '  Current streak: ' + streak + ' weeks at 30+';
+    } else if(streak === 1){
+      streakText.textContent = 'This week hit 30 — one more week to lock in a streak 💪';
+    } else {
+      streakText.textContent = 'No streak yet — hit 30 two weeks running to unlock one 🔥';
+    }
+  }
+
+  // ---------- wire up ----------
+  document.getElementById('btnWeights').addEventListener('click', () => addEntry('weights'));
+  document.getElementById('btnCardio').addEventListener('click', () => addEntry('cardio'));
+  document.getElementById('undoBtn').addEventListener('click', undoLast);
+  window.addEventListener('resize', () => {
+    if(fireworksCanvas.style.display === 'block'){
+      fireworksCanvas.width = window.innerWidth;
+      fireworksCanvas.height = window.innerHeight;
+    }
+  });
+
+  (async function init(){
+    loadSettings();
+    loadMotivationState();
+    applyBackground();
+    await loadEntries();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
