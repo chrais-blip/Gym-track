@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>30 Things</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0d0c;
+    --panel: #121613;
+    --panel-2: #161c18;
+    --border: #232b26;
+    --chalk: #ece8dd;
+    --muted: #7c8880;
+    --weights: #5b8ba6;
+    --weights-glow: #8fc0da;
+    --cardio: #3fb673;
+    --cardio-glow: #7fe3a6;
+    --gold: #ffb300;
+    --gold-glow: #ffd166;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(255,179,0,0.06), transparent 55%),
+      var(--bg);
+    color: var(--chalk);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height:100vh;
+    padding: 22px 16px 60px;
+  }
+  .wrap{max-width: 520px; margin: 0 auto;}
+
+  /* ---- Header ---- */
+  .brand{
+    text-align:center;
+    margin-bottom: 22px;
+  }
+  .brand .eyebrow{
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .brand h1{
+    font-family:'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 34px;
+    letter-spacing: 3px;
+    margin: 0;
+    background: linear-gradient(180deg, #fff, #c9d3d0 55%, #8a9490);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(255,255,255,0.08);
+  }
+  .brand h1 span{ color: var(--gold); -webkit-text-fill-color: var(--gold); text-shadow: 0 0 18px rgba(255,179,0,0.55);}
+
+  /* ---- Scoreboard panel ---- */
+  .scoreboard{
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 18px 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 40px -20px rgba(0,0,0,0.6);
+    margin-bottom: 18px;
+  }
+  .score-row{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 14px;
+  }
+  .score-label{
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .score-digits{
+    font-family:'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 0 6px var(--gold-glow), 0 0 26px rgba(255,179,0,0.45);
+  }
+  .score-digits.small{ font-size: 26px; color: var(--chalk); text-shadow: 0 0 14px rgba(236,232,221,0.25);}
+  .score-target{ text-align:right; }
+
+  /* 30-bulb strip */
+  .bulbs{
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin: 10px 0 4px;
+  }
+  .bulb{
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: #1b211d;
+    border: 1px solid var(--border);
+    transition: all .25s ease;
+  }
+  .bulb.on-weights{
+    background: var(--weights);
+    box-shadow: 0 0 8px var(--weights-glow), inset 0 0 4px rgba(255,255,255,0.4);
+    border-color: transparent;
+  }
+  .bulb.on-cardio{
+    background: var(--cardio);
+    box-shadow: 0 0 8px var(--cardio-glow), inset 0 0 4px rgba(255,255,255,0.4);
+    border-color: transparent;
+  }
+  .overflow-badge{
+    text-align:center;
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  /* ---- Tap buttons ---- */
+  .buttons{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .tapbtn{
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 10px;
+    min-height: 118px;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    cursor:pointer;
+    user-select:none;
+    background: var(--panel);
+    transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    -webkit-user-select:none;
+  }
+  .tapbtn:active{ transform: scale(0.96); }
+  .tapbtn .icon{ font-size: 30px; line-height:1; }
+  .tapbtn .label{
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+  }
+  .tapbtn .sub{ font-size: 11px; color: var(--muted); letter-spacing: 1px;}
+  .tapbtn.weights{ box-shadow: inset 0 0 0 1px rgba(91,139,166,0.25);}
+  .tapbtn.weights .icon, .tapbtn.weights .label{ color: var(--weights-glow); }
+  .tapbtn.weights:active{ background: rgba(91,139,166,0.14); box-shadow: 0 0 24px rgba(91,139,166,0.35); }
+  .tapbtn.cardio{ box-shadow: inset 0 0 0 1px rgba(63,182,115,0.25);}
+  .tapbtn.cardio .icon, .tapbtn.cardio .label{ color: var(--cardio-glow); }
+  .tapbtn.cardio:active{ background: rgba(63,182,115,0.14); box-shadow: 0 0 24px rgba(63,182,115,0.35); }
+
+  .undo{
+    text-align:center;
+    font-size: 12px;
+    color: var(--muted);
+    margin: -8px 0 18px;
+    cursor:pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .undo:hover{ color: var(--chalk); }
+
+  /* ---- Section cards ---- */
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 16px 12px;
+    margin-bottom: 14px;
+  }
+  .card h2{
+    font-family:'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+
+  .chart{
+    display:flex;
+    align-items:flex-end;
+    gap: 8px;
+    height: 120px;
+    position: relative;
+  }
+  .chart.weekly{ gap: 10px; }
+  .target-line{
+    position:absolute;
+    left:0; right:0;
+    border-top: 1px dashed rgba(255,179,0,0.5);
+  }
+  .target-line span{
+    position:absolute;
+    right:0; top:-16px;
+    font-size:10px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .bar-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    gap:6px;
+  }
+  .bar-stack{
+    width: 100%;
+    max-width: 34px;
+    display:flex;
+    flex-direction:column-reverse;
+    justify-content:flex-start;
+    border-radius: 5px 5px 3px 3px;
+    overflow:hidden;
+    background: #171d19;
+    min-height: 3px;
+  }
+  .bar-seg{ width:100%; }
+  .bar-seg.weights{ background: linear-gradient(180deg, var(--weights-glow), var(--weights)); }
+  .bar-seg.cardio{ background: linear-gradient(180deg, var(--cardio-glow), var(--cardio)); }
+  .bar-col .bar-value{ font-size: 10px; color: var(--muted); }
+  .bar-col.hit .bar-value{ color: var(--gold); font-weight:600; }
+  .bar-col .bar-day{ font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
+
+  .prop-bar{
+    display:flex;
+    height: 14px;
+    border-radius: 8px;
+    overflow:hidden;
+    background:#171d19;
+    margin-bottom: 8px;
+  }
+  .prop-bar .seg.weights{ background: var(--weights); }
+  .prop-bar .seg.cardio{ background: var(--cardio); }
+  .prop-legend{
+    display:flex;
+    justify-content:space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .prop-legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+  .dot.weights{ background: var(--weights); }
+  .dot.cardio{ background: var(--cardio); }
+
+  .streak-strip{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .streak-strip .flames{ font-size: 15px; letter-spacing: 2px; }
+
+  /* ---- Reward overlay ---- */
+  .overlay{
+    position:fixed; inset:0;
+    background: rgba(5,7,6,0.88);
+    display:flex; align-items:center; justify-content:center;
+    z-index: 50;
+    opacity:0; pointer-events:none;
+    transition: opacity .3s ease;
+    padding: 24px;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .reward-card{
+    text-align:center;
+    max-width: 360px;
+    transform: scale(0.9);
+    transition: transform .3s ease;
+  }
+  .overlay.show .reward-card{ transform: scale(1); }
+  .reward-card .big-emoji{ font-size: 60px; margin-bottom: 6px; filter: drop-shadow(0 0 20px rgba(255,179,0,0.6)); }
+  .reward-card h3{
+    font-family:'Orbitron', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,179,0,0.6);
+    margin: 4px 0 8px;
+  }
+  .reward-card p{ color: var(--chalk); font-size: 14px; opacity:0.85; margin: 0 0 20px; }
+  .reward-card button{
+    background: var(--gold);
+    color: #1a1200;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    padding: 12px 26px;
+    border-radius: 30px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor:pointer;
+  }
+  .toast{
+    position:fixed;
+    bottom: 24px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--chalk);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    opacity:0;
+    transition: all .3s ease;
+    z-index: 40;
+    white-space: nowrap;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .footer-note{ text-align:center; font-size:11px; color:#4a544e; margin-top: 18px; letter-spacing: 0.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <div class="eyebrow">Daily Training Log</div>
+    <h1>30 <span>THINGS</span></h1>
+  </div>
+
+  <div class="scoreboard">
+    <div class="score-row">
+      <div>
+        <div class="score-label">This Week</div>
+        <div class="score-digits" id="weekTotal">0</div>
+      </div>
+      <div class="score-target">
+        <div class="score-label">Target</div>
+        <div class="score-digits small">/ 30</div>
+      </div>
+    </div>
+    <div class="bulbs" id="bulbs"></div>
+    <div class="overflow-badge" id="overflowBadge" style="display:none;"></div>
+  </div>
+
+  <div class="buttons">
+    <div class="tapbtn weights" id="btnWeights">
+      <div class="icon">🏋️</div>
+      <div class="label">WEIGHTS</div>
+      <div class="sub">tap to log</div>
+    </div>
+    <div class="tapbtn cardio" id="btnCardio">
+      <div class="icon">🏃</div>
+      <div class="label">CARDIO</div>
+      <div class="sub">5 min block</div>
+    </div>
+  </div>
+
+  <div class="undo" id="undoBtn">undo last entry</div>
+
+  <div class="card">
+    <h2>This Week — Daily</h2>
+    <div class="chart" id="dailyChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>Weekly History</h2>
+    <div class="chart weekly" id="weeklyChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>Weights vs Cardio</h2>
+    <div class="prop-bar" id="propBar"></div>
+    <div class="prop-legend">
+      <span><span class="dot weights"></span><span id="propWeightsLabel">Weights 0%</span></span>
+      <span><span id="propCardioLabel">Cardio 0%</span><span class="dot cardio" style="margin-left:6px;"></span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="streak-strip">
+      <span id="streakText">No streak yet — hit 30 two weeks running to unlock one 🔥</span>
+    </div>
+  </div>
+
+  <div class="footer-note">Data is saved on this device automatically</div>
+</div>
+
+<div class="overlay" id="rewardOverlay">
+  <div class="reward-card">
+    <div class="big-emoji">🏆</div>
+    <h3 id="rewardTitle">2-WEEK STREAK!</h3>
+    <p id="rewardBody">You hit 30+ things two weeks in a row. That's real consistency.</p>
+    <button id="rewardClose">LET'S GO</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'things30_entries';
+  let entries = [];
+
+  const bulbsEl = document.getElementById('bulbs');
+  const weekTotalEl = document.getElementById('weekTotal');
+  const overflowBadge = document.getElementById('overflowBadge');
+  const dailyChart = document.getElementById('dailyChart');
+  const weeklyChart = document.getElementById('weeklyChart');
+  const propBar = document.getElementById('propBar');
+  const propWeightsLabel = document.getElementById('propWeightsLabel');
+  const propCardioLabel = document.getElementById('propCardioLabel');
+  const streakText = document.getElementById('streakText');
+  const toastEl = document.getElementById('toast');
+  const overlay = document.getElementById('rewardOverlay');
+  const rewardTitle = document.getElementById('rewardTitle');
+  const rewardBody = document.getElementById('rewardBody');
+
+  // ---------- storage ----------
+  // Uses localStorage so data persists in Safari on iPhone (window.storage
+  // only exists inside Claude's own artifact preview, not in a saved/standalone file).
+  async function loadEntries(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        entries = JSON.parse(raw);
+      }
+    }catch(e){
+      entries = [];
+    }
+  }
+  async function saveEntries(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }catch(e){
+      console.error('Storage error', e);
+      showToast('⚠️ Could not save — storage may be full or blocked');
+    }
+  }
+
+  // ---------- date helpers ----------
+  function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function mondayOf(d){
+    const x = startOfDay(d);
+    const day = x.getDay(); // 0 Sun .. 6 Sat
+    const diff = (day === 0 ? -6 : 1 - day);
+    x.setDate(x.getDate() + diff);
+    return x;
+  }
+  function weekKey(d){ return mondayOf(d).toISOString().slice(0,10); }
+  function dayKey(d){ return startOfDay(d).toISOString().slice(0,10); }
+  function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+
+  // ---------- core add/undo ----------
+  async function addEntry(type){
+    const now = new Date();
+    const prevWeekTotal = weekTotalFor(weekKey(now));
+    entries.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), type, ts: now.toISOString() });
+    await saveEntries();
+    const newWeekTotal = weekTotalFor(weekKey(now));
+    render();
+    checkRewards(prevWeekTotal, newWeekTotal, now);
+  }
+
+  async function undoLast(){
+    if(entries.length === 0) return;
+    entries.pop();
+    await saveEntries();
+    render();
+    showToast('Last entry removed');
+  }
+
+  function weekTotalFor(wk){
+    return entries.filter(e => weekKey(new Date(e.ts)) === wk).length;
+  }
+
+  // ---------- rewards ----------
+  function checkRewards(prevTotal, newTotal, now){
+    if(prevTotal < 30 && newTotal >= 30){
+      const thisWeek = weekKey(now);
+      const prevWeekDate = addDays(mondayOf(now), -7);
+      const prevWeekK = weekKey(prevWeekDate);
+      const prevWeekCount = weekTotalFor(prevWeekK);
+      if(prevWeekCount >= 30){
+        showReward('2-WEEK STREAK!', "You hit 30+ things two weeks running. That's real consistency. 🔥");
+      } else {
+        showToast('🎯 Weekly target hit — 30 things!');
+      }
+    }
+  }
+
+  function showReward(title, body){
+    rewardTitle.textContent = title;
+    rewardBody.textContent = body;
+    overlay.classList.add('show');
+  }
+  document.getElementById('rewardClose').addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
+
+  let toastTimer = null;
+  function showToast(msg){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+
+  // ---------- render ----------
+  function render(){
+    const now = new Date();
+    const thisWeekKey = weekKey(now);
+    const weekEntries = entries.filter(e => weekKey(new Date(e.ts)) === thisWeekKey);
+    const total = weekEntries.length;
+
+    weekTotalEl.textContent = total;
+
+    // bulbs
+    bulbsEl.innerHTML = '';
+    const shown = weekEntries.slice(0, 30);
+    for(let i=0; i<30; i++){
+      const b = document.createElement('div');
+      b.className = 'bulb';
+      if(shown[i]){
+        b.classList.add(shown[i].type === 'weights' ? 'on-weights' : 'on-cardio');
+      }
+      bulbsEl.appendChild(b);
+    }
+    if(total > 30){
+      overflowBadge.style.display = 'block';
+      overflowBadge.textContent = '+' + (total - 30) + ' beyond target 🎉';
+    } else {
+      overflowBadge.style.display = 'none';
+    }
+
+    renderDaily(now, thisWeekKey);
+    renderWeekly(now);
+    renderProportion();
+    renderStreak(now);
+  }
+
+  function renderDaily(now, thisWeekKey){
+    dailyChart.innerHTML = '';
+    const monday = mondayOf(now);
+    const days = [];
+    let maxVal = 1;
+    for(let i=0;i<7;i++){
+      const d = addDays(monday, i);
+      const dk = dayKey(d);
+      const dayEntries = entries.filter(e => dayKey(new Date(e.ts)) === dk);
+      const w = dayEntries.filter(e=>e.type==='weights').length;
+      const c = dayEntries.filter(e=>e.type==='cardio').length;
+      days.push({ d, w, c, total: w+c });
+      maxVal = Math.max(maxVal, w+c);
+    }
+    const labels = ['M','T','W','T','F','S','S'];
+    days.forEach((day, i) => {
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      const stack = document.createElement('div');
+      stack.className = 'bar-stack';
+      const heightPx = 84;
+      const wH = maxVal ? (day.w / maxVal) * heightPx : 0;
+      const cH = maxVal ? (day.c / maxVal) * heightPx : 0;
+      stack.style.height = Math.max(wH + cH, day.total>0?4:0) + 'px';
+      if(day.w > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg weights';
+        seg.style.height = wH + 'px';
+        stack.appendChild(seg);
+      }
+      if(day.c > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg cardio';
+        seg.style.height = cH + 'px';
+        stack.appendChild(seg);
+      }
+      col.appendChild(stack);
+      const val = document.createElement('div');
+      val.className = 'bar-value';
+      val.textContent = day.total;
+      col.appendChild(val);
+      const lab = document.createElement('div');
+      lab.className = 'bar-day';
+      lab.textContent = labels[i];
+      col.appendChild(lab);
+      dailyChart.appendChild(col);
+    });
+  }
+
+  function renderWeekly(now){
+    weeklyChart.innerHTML = '';
+    const currentMonday = mondayOf(now);
+    const weeks = [];
+    for(let i=7;i>=0;i--){
+      const wStart = addDays(currentMonday, -7*i);
+      const wk = weekKey(wStart);
+      const wEntries = entries.filter(e => weekKey(new Date(e.ts)) === wk);
+      const w = wEntries.filter(e=>e.type==='weights').length;
+      const c = wEntries.filter(e=>e.type==='cardio').length;
+      weeks.push({ wk, w, c, total: w+c, start: wStart });
+    }
+    const maxVal = Math.max(30, ...weeks.map(x=>x.total));
+    const heightPx = 90;
+
+    const targetLine = document.createElement('div');
+    targetLine.className = 'target-line';
+    targetLine.style.bottom = (30/maxVal*heightPx) + 'px';
+    const tSpan = document.createElement('span');
+    tSpan.textContent = '30';
+    targetLine.appendChild(tSpan);
+    weeklyChart.appendChild(targetLine);
+
+    weeks.forEach((wk, i) => {
+      const col = document.createElement('div');
+      col.className = 'bar-col' + (wk.total >= 30 ? ' hit' : '');
+      const stack = document.createElement('div');
+      stack.className = 'bar-stack';
+      const wH = (wk.w / maxVal) * heightPx;
+      const cH = (wk.c / maxVal) * heightPx;
+      stack.style.height = Math.max(wH + cH, wk.total>0?4:0) + 'px';
+      if(wk.w > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg weights';
+        seg.style.height = wH + 'px';
+        stack.appendChild(seg);
+      }
+      if(wk.c > 0){
+        const seg = document.createElement('div');
+        seg.className = 'bar-seg cardio';
+        seg.style.height = cH + 'px';
+        stack.appendChild(seg);
+      }
+      col.appendChild(stack);
+      const val = document.createElement('div');
+      val.className = 'bar-value';
+      val.textContent = wk.total;
+      col.appendChild(val);
+      const lab = document.createElement('div');
+      lab.className = 'bar-day';
+      const isCurrent = i === weeks.length-1;
+      lab.textContent = isCurrent ? 'Now' : (wk.start.getMonth()+1) + '/' + wk.start.getDate();
+      col.appendChild(lab);
+      weeklyChart.appendChild(col);
+    });
+  }
+
+  function renderProportion(){
+    const w = entries.filter(e=>e.type==='weights').length;
+    const c = entries.filter(e=>e.type==='cardio').length;
+    const t = w + c;
+    propBar.innerHTML = '';
+    if(t === 0){
+      propBar.innerHTML = '<div class="seg weights" style="width:50%"></div><div class="seg cardio" style="width:50%"></div>';
+      propWeightsLabel.textContent = 'Weights —';
+      propCardioLabel.textContent = 'Cardio —';
+      return;
+    }
+    const wPct = Math.round((w/t)*100);
+    const cPct = 100 - wPct;
+    const segW = document.createElement('div');
+    segW.className = 'seg weights';
+    segW.style.width = wPct + '%';
+    const segC = document.createElement('div');
+    segC.className = 'seg cardio';
+    segC.style.width = cPct + '%';
+    propBar.appendChild(segW);
+    propBar.appendChild(segC);
+    propWeightsLabel.textContent = 'Weights ' + wPct + '%';
+    propCardioLabel.textContent = 'Cardio ' + cPct + '%';
+  }
+
+  function renderStreak(now){
+    const currentMonday = mondayOf(now);
+    // find earliest week with data
+    if(entries.length === 0){
+      streakText.textContent = 'No streak yet — hit 30 two weeks running to unlock one 🔥';
+      return;
+    }
+    const earliest = entries.reduce((min, e) => new Date(e.ts) < min ? new Date(e.ts) : min, new Date(entries[0].ts));
+    let cursor = mondayOf(earliest);
+    const weekTotals = [];
+    while(cursor <= currentMonday){
+      const wk = weekKey(cursor);
+      weekTotals.push(weekTotalFor(wk));
+      cursor = addDays(cursor, 7);
+    }
+    let streak = 0;
+    for(let i = weekTotals.length - 1; i >= 0; i--){
+      if(weekTotals[i] >= 30) streak++;
+      else break;
+    }
+    if(streak >= 2){
+      streakText.textContent = '🔥 '.repeat(Math.min(streak,5)).trim() + '  Current streak: ' + streak + ' weeks at 30+';
+    } else if(streak === 1){
+      streakText.textContent = 'This week hit 30 — one more week to lock in a streak 💪';
+    } else {
+      streakText.textContent = 'No streak yet — hit 30 two weeks running to unlock one 🔥';
+    }
+  }
+
+  // ---------- wire up ----------
+  document.getElementById('btnWeights').addEventListener('click', () => addEntry('weights'));
+  document.getElementById('btnCardio').addEventListener('click', () => addEntry('cardio'));
+  document.getElementById('undoBtn').addEventListener('click', undoLast);
+
+  (async function init(){
+    await loadEntries();
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
