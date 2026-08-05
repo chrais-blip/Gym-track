@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Gym Tracker</title>
+<style>
+:root{--bg:#f6f5f8;--card:#fff;--text:#19171d;--muted:#77727d;--accent:#8b4de8;--accent2:#e94d9b;--line:#e7e3ea}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);padding-bottom:30px}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 12px;background:var(--card);position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+h1{font-size:27px;margin:0 0 3px}.sub{color:var(--muted);font-size:14px}
+main{max-width:650px;margin:auto;padding:16px}
+.card{background:var(--card);border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 1px 5px #0000000d}
+.progress{height:14px;background:#eeeaf1;border-radius:10px;overflow:hidden;margin:12px 0 8px}.bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:.25s}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.big{font-size:34px;font-weight:750}.muted{color:var(--muted)}
+button,input,select{font:inherit} button{border:0;border-radius:12px;padding:12px 14px;font-weight:650;cursor:pointer}
+.primary{background:var(--accent);color:white}.secondary{background:#eeeaf1;color:var(--text)}.danger{background:#ffe8e8;color:#b12626}
+.activity{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}.activity:last-child{border-bottom:0}
+.activity-name{font-weight:650}.activity-type{font-size:12px;color:var(--muted);margin-top:3px}
+.add{display:flex;gap:8px;margin-top:12px}.add input,.add select{flex:1;min-width:0;border:1px solid var(--line);background:white;border-radius:12px;padding:11px}
+canvas{width:100%;height:190px;display:block}
+.smallbtn{padding:9px 11px;font-size:13px}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;z-index:20}.modal.open{display:flex}
+.sheet{background:white;width:100%;border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow:auto}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}.sheet input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px}
+.actions{display:flex;gap:8px;margin-top:18px}.actions button{flex:1}
+.weeknav{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+</style>
+</head>
+<body>
+<header><h1>Gym Tracker</h1><div class="sub">30 activities a week · 3 sets or 5 min cardio = 1 activity</div></header>
+<main>
+<section class="card">
+  <div class="row"><div><div class="muted">This week</div><div class="big" id="count">0 / 30</div></div><button class="secondary smallbtn" id="undo">Undo</button></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="muted" id="remaining">30 activities to go</div>
+</section>
+
+<section class="card">
+  <div class="row"><h2 style="margin:0">Activities</h2><button class="primary smallbtn" id="addBtn">+ Add</button></div>
+  <div id="activities"></div>
+  <div class="add" id="addForm" style="display:none">
+    <input id="newName" placeholder="Activity name">
+    <select id="newType"><option value="weights">3 sets</option><option value="cardio">5 min cardio</option></select>
+    <button class="primary" id="saveActivity">Save</button>
+  </div>
+</section>
+
+<section class="card">
+  <div class="row"><h2 style="margin:0">Progress</h2><span class="muted">Last 8 weeks</span></div>
+  <canvas id="chart" width="600" height="220"></canvas>
+</section>
+
+<section class="card">
+  <div class="row"><h2 style="margin:0">History</h2><button class="danger smallbtn" id="clear">Clear all</button></div>
+  <div id="history" class="muted" style="margin-top:10px"></div>
+</section>
+</main>
+
+<div class="modal" id="modal"><div class="sheet">
+  <div class="row"><h2 id="modalTitle" style="margin:0">Record activity</h2><button class="secondary smallbtn" id="close">Close</button></div>
+  <div id="weightFields">
+    <label>Weight</label><input id="weight" type="number" inputmode="decimal" placeholder="e.g. 40">
+    <label>Reps (optional)</label><input id="reps" type="number" inputmode="numeric" placeholder="e.g. 10">
+  </div>
+  <div id="cardioFields" style="display:none">
+    <label>Minutes</label><input id="minutes" type="number" inputmode="decimal" value="5">
+  </div>
+  <div class="actions"><button class="secondary" id="cancel">Cancel</button><button class="primary" id="record">Record</button></div>
+</div></div>
+
+<script>
+const KEY="gymTrackerV1";
+let state=JSON.parse(localStorage.getItem(KEY)||"null")||{
+ activities:[
+  {id:1,name:"Squat",type:"weights"},{id:2,name:"Bench Press",type:"weights"},
+  {id:3,name:"Deadlift",type:"weights"},{id:4,name:"Shoulder Press",type:"weights"},
+  {id:5,name:"Row",type:"weights"},{id:6,name:"Cardio",type:"cardio"}
+ ], logs:[]
+};
+let selected=null,lastLog=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function monday(d){d=new Date(d);let day=d.getDay()||7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day+1);return d}
+function weekKey(d=new Date()){return monday(d).toISOString().slice(0,10)}
+function weekCount(key=weekKey()){return state.logs.filter(x=>x.week===key).length}
+function fmt(d){return new Date(d).toLocaleDateString(undefined,{day:"numeric",month:"short"})}
+function render(){
+ let n=weekCount(),pct=Math.min(100,n/30*100);
+ count.textContent=`${n} / 30`;bar.style.width=pct+"%";
+ remaining.textContent=n>=30?"Target reached 🎉":`${30-n} activities to go`;
+ activities.innerHTML=state.activities.map(a=>`<div class="activity"><div><div class="activity-name">${esc(a.name)}</div><div class="activity-type">${a.type==="cardio"?"5 min cardio":"3 sets"}</div></div><button class="primary smallbtn" onclick="openRecord(${a.id})">+</button></div>`).join("");
+ history.innerHTML=state.logs.length?state.logs.slice().reverse().slice(0,30).map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${esc(x.name)}</b> <span>${x.type==="cardio"?`${x.minutes||5} min`:`${x.weight?x.weight+" · ":""}${x.reps?x.reps+" reps":"3 sets"}`}</span><span style="float:right">${fmt(x.date)}</span></div>`).join(""):"No activities recorded yet.";
+ drawChart();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function openRecord(id){
+ selected=state.activities.find(a=>a.id===id);modalTitle.textContent=selected.name;
+ weightFields.style.display=selected.type==="weights"?"block":"none";cardioFields.style.display=selected.type==="cardio"?"block":"none";
+ weight.value="";reps.value="";minutes.value=5;modal.classList.add("open");
+}
+function drawChart(){
+ const c=chart,ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
+ const weeks=[];let d=monday(new Date());for(let i=7;i>=0;i--){let x=new Date(d);x.setDate(d.getDate()-i*7);weeks.push({k:weekKey(x),label:x.toLocaleDateString(undefined,{day:"numeric",month:"short"})})}
+ const vals=weeks.map(x=>weekCount(x.k)), max=30;
+ ctx.strokeStyle="#ddd";ctx.lineWidth=1;for(let y=0;y<=3;y++){let yy=20+(h-55)*y/3;ctx.beginPath();ctx.moveTo(35,yy);ctx.lineTo(w-12,yy);ctx.stroke()}
+ ctx.strokeStyle="#8b4de8";ctx.lineWidth=4;ctx.lineJoin="round";ctx.beginPath();
+ vals.forEach((v,i)=>{let x=45+i*(w-70)/7,y=20+(h-55)*(1-v/max);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+ vals.forEach((v,i)=>{let x=45+i*(w-70)/7,y=20+(h-55)*(1-v/max);ctx.fillStyle="#8b4de8";ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.fillStyle="#555";ctx.font="12px -apple-system";ctx.textAlign="center";ctx.fillText(v,x,y-10);ctx.fillText(weeks[i].label,x,h-15)})
+}
+addBtn.onclick=()=>{addForm.style.display=addForm.style.display==="none"?"flex":"none";newName.focus()}
+saveActivity.onclick=()=>{let name=newName.value.trim();if(!name)return;state.activities.push({id:Date.now(),name,type:newType.value});newName.value="";addForm.style.display="none";save()}
+record.onclick=()=>{if(!selected)return;let x={id:Date.now(),activityId:selected.id,name:selected.name,type:selected.type,date:new Date().toISOString(),week:weekKey()};if(selected.type==="weights"){x.weight=weight.value;x.reps=reps.value}else{x.minutes=minutes.value||5}state.logs.push(x);lastLog=x;modal.classList.remove("open");save()}
+undo.onclick=()=>{if(!state.logs.length)return;state.logs.pop();save()}
+close.onclick=cancel.onclick=()=>modal.classList.remove("open");
+clear.onclick=()=>{if(confirm("Delete all gym data?")){state.logs=[];save()}}
+render();
+</script>
+</body>
+</html>
