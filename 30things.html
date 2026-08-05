@@ -8,18 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0a0d0c;
-    --panel: #121613;
-    --panel-2: #161c18;
-    --border: #232b26;
-    --chalk: #ece8dd;
+    --bg: #fbe9d8;
+    --panel: #fef4ea;
+    --panel-2: #fbe4d0;
+    --border: #f0cba7;
+    --chalk: #1c211e;
     --muted: #7c8880;
-    --weights: #5b8ba6;
-    --weights-glow: #8fc0da;
-    --cardio: #3fb673;
-    --cardio-glow: #7fe3a6;
-    --gold: #ffb300;
-    --gold-glow: #ffd166;
+    --weights: #3f7996;
+    --weights-glow: #5b8ba6;
+    --cardio: #2f9c60;
+    --cardio-glow: #3fb673;
+    --gold: #d98e00;
+    --gold-glow: #ffb300;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0; padding:0;}
@@ -52,11 +52,11 @@
     font-size: 34px;
     letter-spacing: 3px;
     margin: 0;
-    background: linear-gradient(180deg, #fff, #c9d3d0 55%, #8a9490);
+    background: linear-gradient(180deg, #1c211e, #3a423d 55%, #5c6560);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 30px rgba(255,255,255,0.08);
+    text-shadow: none;
   }
   .brand h1 span{ color: var(--gold); -webkit-text-fill-color: var(--gold); text-shadow: 0 0 18px rgba(255,179,0,0.55);}
 
@@ -103,7 +103,7 @@
   .bulb{
     aspect-ratio: 1;
     border-radius: 4px;
-    background: #1b211d;
+    background: #f5d9bd;
     border: 1px solid var(--border);
     transition: all .25s ease;
   }
@@ -229,7 +229,7 @@
     justify-content:flex-start;
     border-radius: 5px 5px 3px 3px;
     overflow:hidden;
-    background: #171d19;
+    background: #f5d9bd;
     min-height: 3px;
   }
   .bar-seg{ width:100%; }
@@ -244,7 +244,7 @@
     height: 14px;
     border-radius: 8px;
     overflow:hidden;
-    background:#171d19;
+    background:#f5d9bd;
     margin-bottom: 8px;
   }
   .prop-bar .seg.weights{ background: var(--weights); }
@@ -271,7 +271,7 @@
   /* ---- Reward overlay ---- */
   .overlay{
     position:fixed; inset:0;
-    background: rgba(5,7,6,0.88);
+    background: rgba(251,233,216,0.92);
     display:flex; align-items:center; justify-content:center;
     z-index: 50;
     opacity:0; pointer-events:none;
