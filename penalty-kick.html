@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Penalty Shootout</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: linear-gradient(#1b2735, #0a0f1a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+  }
+  #wrap {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 800 / 600;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    touch-action: none;
+  }
+  #hud {
+    position: absolute; top: 12px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between;
+    color: #fff; font-weight: 700; font-size: 16px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    pointer-events: none;
+  }
+  #hud .pill {
+    background: rgba(0,0,0,0.35);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+  }
+  #message {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    font-size: 42px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.3);
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    text-align: center;
+    white-space: nowrap;
+  }
+  #message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #instructions {
+    position: absolute;
+    bottom: 10px; left: 0; right: 0;
+    text-align: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="800" height="600"></canvas>
+  <div id="hud">
+    <div class="pill" id="scorePill">⚽ Goals: 0</div>
+    <div class="pill" id="streakPill">🔥 Streak: 0</div>
+    <div class="pill" id="attemptsPill">🎯 Shots: 0</div>
+  </div>
+  <div id="message"></div>
+  <div id="instructions">Drag the ball DOWN and release to shoot &nbsp;•&nbsp; drag sideways to aim &nbsp;•&nbsp; pull further for more power</div>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const messageEl = document.getElementById('message');
+const scorePill = document.getElementById('scorePill');
+const streakPill = document.getElementById('streakPill');
+const attemptsPill = document.getElementById('attemptsPill');
+const instructionsEl = document.getElementById('instructions');
+
+const W = 800, H = 600;
+
+// Goal geometry
+const GOAL_LEFT = 190, GOAL_RIGHT = 610, GOAL_TOP = 108, GOAL_GROUND = 258;
+const CENTER_X = 400;
+
+let score = 0, attempts = 0, streak = 0;
+
+const ballStart = { x: 400, y: 500 };
+let ball = { x: ballStart.x, y: ballStart.y, r: 15, scale: 1, spin: 0 };
+
+let keeper = {
+  x: CENTER_X, homeX: CENTER_X, y: 190,
+  diving: false, diveFromX: CENTER_X, diveToX: CENTER_X,
+  diveStart: 0, diveDuration: 380
+};
+
+let state = 'idle'; // idle | dragging | flight | result
+let dragStart = null, dragCurrent = null;
+let shotData = null;
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function updateHUD() {
+  scorePill.textContent = `⚽ Goals: ${score}`;
+  streakPill.textContent = `🔥 Streak: ${streak}`;
+  attemptsPill.textContent = `🎯 Shots: ${attempts}`;
+}
+
+function showMessage(text) {
+  messageEl.textContent = text;
+  messageEl.classList.add('show');
+}
+function hideMessage() {
+  messageEl.classList.remove('show');
+}
+
+// ---------- Input ----------
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width, scaleY = H / rect.height;
+  const cx = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+  const cy = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+  return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY };
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (state !== 'idle') return;
+  const pos = getPos(e);
+  const d = Math.hypot(pos.x - ball.x, pos.y - ball.y);
+  if (d < 50) {
+    state = 'dragging';
+    dragStart = { x: ball.x, y: ball.y };
+    dragCurrent = pos;
+    instructionsEl.style.opacity = '0';
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (state !== 'dragging') return;
+  dragCurrent = getPos(e);
+  const maxPull = 220;
+  const pull = { x: dragCurrent.x - dragStart.x, y: dragCurrent.y - dragStart.y };
+  let len = Math.hypot(pull.x, pull.y);
+  if (len > maxPull) {
+    const s = maxPull / len;
+    dragCurrent = { x: dragStart.x + pull.x * s, y: dragStart.y + pull.y * s };
+  }
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (state !== 'dragging') return;
+  const pull = { x: dragCurrent.x - dragStart.x, y: dragCurrent.y - dragStart.y };
+  const pullLen = Math.hypot(pull.x, pull.y);
+  if (pullLen < 22 || pull.y < 8) {
+    state = 'idle';
+    dragCurrent = null;
+    return;
+  }
+  shoot(pull, pullLen);
+});
+
+canvas.addEventListener('pointercancel', () => {
+  if (state === 'dragging') { state = 'idle'; dragCurrent = null; }
+});
+
+// ---------- Shooting ----------
+function shoot(pull, pullLen) {
+  attempts++;
+  const maxPull = 220;
+  const clampedLen = clamp(pullLen, 0, maxPull);
+  const power = clamp(clampedLen / maxPull, 0.12, 1);
+  const ux = pull.x / pullLen;
+
+  const overBar = power > 0.94;
+  const targetX = CENTER_X - ux * 260;
+  const wide = !overBar && Math.abs(targetX - CENTER_X) > 232;
+  const topCorner = !overBar && !wide && power > 0.72 && Math.abs(targetX - CENTER_X) > 130;
+
+  const finalY = overBar ? 30 : lerp(250, 118, power);
+  const duration = lerp(780, 340, power);
+
+  shotData = {
+    targetX, finalY, power, overBar, wide, topCorner,
+    startX: ball.x, startY: ball.y,
+    startTime: performance.now(), duration
+  };
+
+  state = 'flight';
+  dragCurrent = null;
+
+  const reactionDelay = 90 + Math.random() * 220;
+  setTimeout(() => {
+    if (state !== 'flight') return;
+    startKeeperDive(targetX);
+  }, reactionDelay);
+}
+
+function startKeeperDive(targetX) {
+  let diveToX;
+  const guessesRight = Math.random() < 0.45; // keeper sometimes reads it correctly
+  if (guessesRight) {
+    diveToX = clamp(targetX + (Math.random() * 50 - 25), GOAL_LEFT - 30, GOAL_RIGHT + 30);
+  } else {
+    const options = [GOAL_LEFT + 45, CENTER_X, GOAL_RIGHT - 45];
+    diveToX = options[Math.floor(Math.random() * options.length)] + (Math.random() * 40 - 20);
+  }
+  keeper.diving = true;
+  keeper.diveFromX = keeper.x;
+  keeper.diveToX = diveToX;
+  keeper.diveStart = performance.now();
+  keeper.diveDuration = 340 + Math.random() * 120;
+}
+
+function finalizeShot() {
+  let msg, isGoal;
+  if (shotData.overBar) {
+    isGoal = false; msg = 'OVER THE BAR! 🚀';
+  } else if (shotData.wide) {
+    isGoal = false; msg = 'WIDE! ❌';
+  } else if (shotData.topCorner) {
+    isGoal = true; msg = 'TOP CORNER!! ⚡';
+  } else {
+    const reach = 60;
+    if (Math.abs(keeper.x - shotData.targetX) < reach) {
+      isGoal = false; msg = 'SAVED! 🧤';
+    } else {
+      isGoal = true; msg = 'GOAL!! ⚽';
+    }
+  }
+
+  if (isGoal) { score++; streak++; } else { streak = 0; }
+  updateHUD();
+  showMessage(msg);
+  state = 'result';
+  setTimeout(resetRound, 1500);
+}
+
+function resetRound() {
+  state = 'idle';
+  ball.x = ballStart.x; ball.y = ballStart.y; ball.scale = 1; ball.spin = 0;
+  keeper.diving = false; keeper.x = keeper.homeX;
+  shotData = null;
+  hideMessage();
+  instructionsEl.style.opacity = '1';
+}
+
+// ---------- Drawing ----------
+function drawBackground() {
+  const sky = ctx.createLinearGradient(0, 0, 0, 260);
+  sky.addColorStop(0, '#4a90d9');
+  sky.addColorStop(1, '#bcdff2');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, 260);
+
+  // crowd stands (simplified)
+  ctx.fillStyle = '#33475b';
+  ctx.fillRect(0, 60, W, 60);
+  for (let i = 0; i < 60; i++) {
+    ctx.fillStyle = `hsl(${(i * 47) % 360}, 55%, ${40 + (i % 3) * 8}%)`;
+    ctx.fillRect(i * (W / 60), 62, W / 60 - 1, 56);
+  }
+
+  // pitch
+  const pitch = ctx.createLinearGradient(0, 260, 0, H);
+  pitch.addColorStop(0, '#2e8b3e');
+  pitch.addColorStop(1, '#3fae52');
+  ctx.fillStyle = pitch;
+  ctx.fillRect(0, 260, W, H - 260);
+
+  // mowed stripes (perspective trapezoids)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 260, W, H - 260);
+  ctx.clip();
+  for (let i = -2; i < 10; i++) {
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+    ctx.beginPath();
+    ctx.moveTo(-200 + i * 110, H);
+    ctx.lineTo(-100 + i * 110, H);
+    ctx.lineTo(300 + i * 40, 260);
+    ctx.lineTo(260 + i * 40, 260);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // 18-yard box
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(90, H);
+  ctx.lineTo(150, 260);
+  ctx.lineTo(650, 260);
+  ctx.lineTo(710, H);
+  ctx.stroke();
+
+  // penalty arc / spot
+  ctx.beginPath();
+  ctx.arc(400, 500, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+}
+
+function drawGoal() {
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 7;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(GOAL_LEFT, GOAL_GROUND + 6);
+  ctx.lineTo(GOAL_LEFT, GOAL_TOP);
+  ctx.lineTo(GOAL_RIGHT, GOAL_TOP);
+  ctx.lineTo(GOAL_RIGHT, GOAL_GROUND + 6);
+  ctx.stroke();
+
+  // net
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  const cols = 14, rows = 8;
+  for (let i = 0; i <= cols; i++) {
+    const x = GOAL_LEFT + (i / cols) * (GOAL_RIGHT - GOAL_LEFT);
+    ctx.beginPath();
+    ctx.moveTo(x, GOAL_TOP);
+    ctx.lineTo(x, GOAL_GROUND);
+    ctx.stroke();
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = GOAL_TOP + (j / rows) * (GOAL_GROUND - GOAL_TOP);
+    ctx.beginPath();
+    ctx.moveTo(GOAL_LEFT, y);
+    ctx.lineTo(GOAL_RIGHT, y);
+    ctx.stroke();
+  }
+}
+
+function drawKeeper() {
+  const x = keeper.x, y = keeper.y;
+  let diveProgress = 0;
+  if (keeper.diving) {
+    diveProgress = clamp((performance.now() - keeper.diveStart) / keeper.diveDuration, 0, 1);
+  }
+  const lean = (keeper.diveToX - keeper.diveFromX) * 0.004;
+  const hop = Math.sin(diveProgress * Math.PI) * 18;
+
+  ctx.save();
+  ctx.translate(x, y - hop);
+  ctx.rotate(clamp(lean, -0.9, 0.9) * diveProgress);
+
+  // shadow
+  ctx.save();
+  ctx.translate(0, hop);
+  ctx.beginPath();
+  ctx.ellipse(0, 46, 26, 7, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fill();
+  ctx.restore();
+
+  // torso
+  ctx.fillStyle = '#f4d000';
+  ctx.beginPath();
+  ctx.roundRect(-16, -20, 32, 46, 8);
+  ctx.fill();
+
+  // arms
+  ctx.strokeStyle = '#f4d000';
+  ctx.lineWidth = 10;
+  ctx.lineCap = 'round';
+  const armSpread = 14 + diveProgress * 20;
+  ctx.beginPath();
+  ctx.moveTo(-14, -12); ctx.lineTo(-armSpread - 14, -12 - diveProgress * 18);
+  ctx.moveTo(14, -12); ctx.lineTo(armSpread + 14, -12 - diveProgress * 18);
+  ctx.stroke();
+  // gloves
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(-armSpread - 14, -12 - diveProgress * 18, 6, 0, Math.PI * 2);
+  ctx.arc(armSpread + 14, -12 - diveProgress * 18, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // legs
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.lineWidth = 11;
+  ctx.beginPath();
+  ctx.moveTo(-7, 24); ctx.lineTo(-12, 46);
+  ctx.moveTo(7, 24); ctx.lineTo(12, 46);
+  ctx.stroke();
+
+  // head
+  ctx.fillStyle = '#e8b088';
+  ctx.beginPath();
+  ctx.arc(0, -30, 11, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawBall() {
+  ctx.save();
+  ctx.translate(ball.x, ball.y);
+  ctx.scale(ball.scale, ball.scale);
+  ctx.rotate(ball.spin);
+
+  ctx.beginPath();
+  ctx.ellipse(0, ball.r * 0.9, ball.r * 0.9, ball.r * 0.25, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(0, 0, ball.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#222';
+  ctx.stroke();
+
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.arc(0, 0, ball.r * 0.32, 0, Math.PI * 2);
+  ctx.fill();
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * ball.r * 0.62, Math.sin(a) * ball.r * 0.62, ball.r * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawAimGuide() {
+  if (state !== 'dragging' || !dragCurrent) return;
+  const pull = { x: dragCurrent.x - dragStart.x, y: dragCurrent.y - dragStart.y };
+  const len = Math.hypot(pull.x, pull.y);
+
+  // pulled ball position
+  ctx.beginPath();
+  ctx.arc(dragCurrent.x, dragCurrent.y, ball.r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fill();
+  ctx.strokeStyle = '#222';
+  ctx.stroke();
+
+  // projected aim line (opposite direction)
+  if (len > 10) {
+    const dirX = -pull.x, dirY = -pull.y;
+    const norm = Math.hypot(dirX, dirY);
+    const ux = dirX / norm, uy = dirY / norm;
+    ctx.save();
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = 'rgba(255,255,60,0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(ballStart.x, ballStart.y);
+    ctx.lineTo(ballStart.x + ux * 300, ballStart.y + uy * 300);
+    ctx.stroke();
+    ctx.restore();
+
+    // power meter
+    const power = clamp(len / 220, 0, 1);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(340, 560, 120, 14);
+    ctx.fillStyle = power > 0.9 ? '#ff4040' : power > 0.7 ? '#ffb020' : '#40e070';
+    ctx.fillRect(340, 560, 120 * power, 14);
+    ctx.strokeStyle = '#fff';
+    ctx.strokeRect(340, 560, 120, 14);
+  }
+}
+
+// ---------- Main loop ----------
+function loop(now) {
+  ctx.clearRect(0, 0, W, H);
+  drawBackground();
+  drawGoal();
+
+  if (keeper.diving) {
+    let t = clamp((now - keeper.diveStart) / keeper.diveDuration, 0, 1);
+    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    keeper.x = lerp(keeper.diveFromX, keeper.diveToX, ease);
+  }
+  drawKeeper();
+
+  if (state === 'flight' && shotData) {
+    let t = (now - shotData.startTime) / shotData.duration;
+    if (t >= 1) {
+      t = 1;
+      ball.x = shotData.targetX;
+      ball.y = shotData.finalY;
+      ball.scale = 1 - 0.62 * t;
+      finalizeShot();
+    } else {
+      const easeT = t;
+      ball.x = lerp(shotData.startX, shotData.targetX, easeT);
+      ball.y = lerp(shotData.startY, shotData.finalY, easeT);
+      ball.scale = 1 - 0.62 * t;
+      ball.spin += 0.35;
+    }
+  } else if (state !== 'dragging') {
+    ball.x = ballStart.x;
+    ball.y = ballStart.y;
+  }
+
+  if (state !== 'dragging') drawBall();
+  drawAimGuide();
+
+  requestAnimationFrame(loop);
+}
+
+updateHUD();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
